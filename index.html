@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deadly Obfuscator — Roblox LuaU</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0c10;
+    min-height: 100vh;
+    font-family: 'JetBrains Mono', monospace;
+    color: #e2e8f0;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #0a0c10 0%, #12161e 100%);
+    border-bottom: 1px solid #1e2533;
+    padding: 20px 28px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -40px; left: -40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(220,30,30,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .skull-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, #dc1e1e, #8b0000);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 0 20px rgba(220,30,30,0.4);
+    flex-shrink: 0;
+  }
+
+  .title-block { flex: 1; }
+  .title-block h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #fff;
+    line-height: 1;
+  }
+  .title-block h1 span { color: #dc1e1e; }
+  .title-block p {
+    font-size: 11px;
+    color: #4a5568;
+    margin-top: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .badge {
+    background: rgba(220,30,30,0.15);
+    border: 1px solid rgba(220,30,30,0.35);
+    color: #fc5a5a;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  .body { padding: 20px 28px 40px; display: flex; flex-direction: column; gap: 16px; }
+
+  .preset-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .preset-label {
+    font-size: 10px;
+    color: #4a5568;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+  .preset-btn {
+    background: #12161e;
+    border: 1px solid #1e2533;
+    color: #8892a4;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+  }
+  .preset-btn:hover { border-color: #dc1e1e; color: #e2e8f0; }
+  .preset-btn.active {
+    background: rgba(220,30,30,0.12);
+    border-color: #dc1e1e;
+    color: #fc5a5a;
+    box-shadow: 0 0 10px rgba(220,30,30,0.15);
+  }
+
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .panel {
+    background: #0d1017;
+    border: 1px solid #1e2533;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    background: #12161e;
+    border-bottom: 1px solid #1e2533;
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 10px;
+    color: #4a5568;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .panel-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  textarea {
+    width: 100%;
+    height: 300px;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #c9d1d9;
+    line-height: 1.7;
+    padding: 14px;
+    caret-color: #dc1e1e;
+  }
+  textarea::placeholder { color: #2d3748; }
+
+  .output-area {
+    height: 300px;
+    overflow-y: auto;
+    padding: 14px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #7dd3a8;
+    word-break: break-all;
+    white-space: pre-wrap;
+  }
+  .output-area.empty { color: #2d3748; font-style: italic; }
+
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  .opt-card {
+    background: #0d1017;
+    border: 1px solid #1e2533;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .opt-card:hover { border-color: #2d3748; }
+  .opt-card.active { background: rgba(220,30,30,0.08); border-color: rgba(220,30,30,0.4); }
+  .opt-card label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 11px; color: #8892a4; font-weight: 500; }
+  .opt-card.active label { color: #fc8a8a; }
+
+  .checkbox {
+    width: 14px; height: 14px;
+    border: 1px solid #2d3748;
+    border-radius: 3px;
+    background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .opt-card.active .checkbox { background: #dc1e1e; border-color: #dc1e1e; }
+  .checkbox-inner {
+    width: 6px; height: 6px;
+    background: white;
+    border-radius: 1px;
+    opacity: 0; transform: scale(0);
+    transition: all 0.1s;
+  }
+  .opt-card.active .checkbox-inner { opacity: 1; transform: scale(1); }
+  .opt-desc { font-size: 10px; color: #2d3748; margin-top: 5px; line-height: 1.4; }
+  .opt-card.active .opt-desc { color: #4a5568; }
+
+  .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+  .btn-obfuscate {
+    background: linear-gradient(135deg, #dc1e1e, #8b0000);
+    border: none;
+    color: white;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    padding: 12px 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    box-shadow: 0 0 20px rgba(220,30,30,0.3);
+  }
+  .btn-obfuscate:hover { box-shadow: 0 0 30px rgba(220,30,30,0.5); transform: translateY(-1px); }
+  .btn-obfuscate:active { transform: translateY(0); }
+  .btn-obfuscate:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .btn-copy {
+    background: #12161e;
+    border: 1px solid #1e2533;
+    color: #8892a4;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 12px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-copy:hover { border-color: #dc1e1e; color: #e2e8f0; }
+
+  .btn-clear {
+    background: transparent;
+    border: 1px solid #1e2533;
+    color: #4a5568;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 12px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-clear:hover { color: #8892a4; border-color: #2d3748; }
+
+  .stats-row { display: flex; gap: 16px; margin-left: auto; }
+  .stat { text-align: right; font-size: 11px; }
+  .stat-val { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 600; color: #dc1e1e; }
+  .stat-key { color: #4a5568; font-size: 10px; margin-top: 1px; }
+
+  .progress-bar { height: 2px; background: #1e2533; border-radius: 1px; overflow: hidden; flex: 1; margin-left: 8px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #8b0000, #dc1e1e); border-radius: 1px; width: 0%; transition: width 0.3s; }
+
+  .watermark { text-align: center; font-size: 10px; color: #1e2533; letter-spacing: 2px; margin-top: 20px; font-family: 'Orbitron', sans-serif; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #0a0c10; }
+  ::-webkit-scrollbar-thumb { background: #1e2533; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #dc1e1e; }
+
+  @media (max-width: 700px) {
+    .panels { grid-template-columns: 1fr; }
+    .options-grid { grid-template-columns: 1fr 1fr; }
+    .stats-row { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="skull-icon">💀</div>
+  <div class="title-block">
+    <h1>DEADLY <span>OBFUSCATOR</span></h1>
+    <p>Roblox LuaU • Powered by Prometheus Engine</p>
+  </div>
+  <div class="badge">v2.0 LETHAL</div>
+</div>
+
+<div class="body">
+  <!-- Presets -->
+  <div class="preset-row">
+    <span class="preset-label">Preset:</span>
+    <button class="preset-btn" onclick="setPreset('weak')">Weak</button>
+    <button class="preset-btn active" onclick="setPreset('medium')">Medium</button>
+    <button class="preset-btn" onclick="setPreset('strong')">Strong</button>
+    <button class="preset-btn" onclick="setPreset('minify')">Minify</button>
+  </div>
+
+  <!-- Panels -->
+  <div class="panels">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-dot" style="background:#3b82f6"></div>
+        Input — Roblox Lua
+      </div>
+      <textarea id="input-code" placeholder="-- Paste your Roblox Lua script here...
+-- Example:
+local Players = game:GetService('Players')
+local function onPlayerAdded(player)
+    print('Player joined:', player.Name)
+    player.CharacterAdded:Connect(function(char)
+        local humanoid = char:WaitForChild('Humanoid')
+        humanoid.WalkSpeed = 20
+    end)
+end
+Players.PlayerAdded:Connect(onPlayerAdded)"></textarea>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-dot" style="background:#dc1e1e"></div>
+        Output — Obfuscated
+        <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+      </div>
+      <div class="output-area empty" id="output-code">-- Output will appear here...</div>
+    </div>
+  </div>
+
+  <!-- Options -->
+  <div class="options-grid" id="opts-grid"></div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button class="btn-obfuscate" onclick="obfuscate()">⚡ OBFUSCATE</button>
+    <button class="btn-copy" onclick="copyOutput()">Copy Output</button>
+    <button class="btn-clear" onclick="clearAll()">Clear</button>
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-val" id="stat-ratio">—</div>
+        <div class="stat-key">SIZE RATIO</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="stat-lines">—</div>
+        <div class="stat-key">OUT LINES</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="watermark">DEADLY OBFUSCATOR • PROMETHEUS ENGINE • ROBLOX LUAU</div>
+
+<script>
+const OPTIONS = [
+  { id: 'varRename',  label: 'Variable Rename', desc: 'Rename locals to gibberish',     presets: ['medium','strong'] },
+  { id: 'stringEnc',  label: 'String Encrypt',  desc: 'Encode string constants',        presets: ['medium','strong'] },
+  { id: 'constFold',  label: 'Const Fold',       desc: 'Fold constant expressions',      presets: ['strong'] },
+  { id: 'ctrlFlow',   label: 'Control Flow',     desc: 'Flatten control flow',           presets: ['strong'] },
+  { id: 'antiTamper', label: 'Anti-Tamper',      desc: 'Add integrity checks',           presets: ['strong'] },
+  { id: 'minify',     label: 'Minify',           desc: 'Remove whitespace/comments',     presets: ['weak','medium','strong','minify'] },
+  { id: 'numericEnc', label: 'Numeric Enc.',     desc: 'Obfuscate number literals',      presets: ['strong'] },
+  { id: 'junkCode',   label: 'Junk Insert',      desc: 'Insert dead code blocks',        presets: ['medium','strong'] },
+  { id: 'proxy',      label: 'Proxy Vars',       desc: 'Wrap globals in proxies',        presets: ['strong'] },
+];
+
+let activeOpts = new Set(['varRename','stringEnc','minify','junkCode']);
+let currentPreset = 'medium';
+
+function renderOpts() {
+  document.getElementById('opts-grid').innerHTML = OPTIONS.map(o => `
+    <div class="opt-card${activeOpts.has(o.id) ? ' active' : ''}" onclick="toggleOpt('${o.id}')">
+      <label>
+        <div class="checkbox"><div class="checkbox-inner"></div></div>
+        ${o.label}
+      </label>
+      <div class="opt-desc">${o.desc}</div>
+    </div>
+  `).join('');
+}
+
+function toggleOpt(id) {
+  activeOpts.has(id) ? activeOpts.delete(id) : activeOpts.add(id);
+  currentPreset = 'custom';
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  renderOpts();
+}
+
+function setPreset(name) {
+  currentPreset = name;
+  activeOpts = new Set(OPTIONS.filter(o => o.presets.includes(name)).map(o => o.id));
+  document.querySelectorAll('.preset-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.toLowerCase() === name);
+  });
+  renderOpts();
+}
+
+function varName(len) {
+  const chars = 'lIl1IiIlIl1iil1lI';
+  return '_' + Array.from({length: len}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+}
+
+function encodeStr(s) {
+  return `(function()local t={}local k={${s.split('').map(c=>c.charCodeAt(0)).join(',')}}for _,v in ipairs(k)do t[#t+1]=string.char(v)end;return table.concat(t)end)()`;
+}
+
+function obfuscate() {
+  const input = document.getElementById('input-code').value.trim();
+  if (!input) { alert('Paste some Roblox Lua first!'); return; }
+
+  const btn = document.querySelector('.btn-obfuscate');
+  btn.disabled = true;
+  btn.textContent = '⏳ PROCESSING...';
+
+  let prog = 0;
+  const interval = setInterval(() => {
+    prog = Math.min(prog + Math.random() * 18, 95);
+    document.getElementById('prog').style.width = prog + '%';
+  }, 80);
+
+  setTimeout(() => {
+    clearInterval(interval);
+    document.getElementById('prog').style.width = '100%';
+
+    let code = input;
+
+    if (activeOpts.has('minify')) {
+      code = code.replace(/--\[\[[\s\S]*?\]\]/g, '');
+      code = code.replace(/--[^\n]*/g, '');
+    }
+
+    if (activeOpts.has('varRename')) {
+      const varMap = {};
+      const locals = [];
+      const lReg = /\blocal\s+([a-zA-Z_][a-zA-Z0-9_]*)\b/g;
+      let m;
+      while ((m = lReg.exec(code)) !== null) {
+        if (!locals.includes(m[1])) locals.push(m[1]);
+      }
+      const reserved = ['game','workspace','script','Players','ReplicatedStorage','ServerStorage','RunService','math','string','table','print','pairs','ipairs','next','type','tostring','tonumber','unpack','select','error','pcall','xpcall','rawget','rawset','rawequal','setmetatable','getmetatable'];
+      locals.forEach(v => {
+        if (!reserved.includes(v)) varMap[v] = varName(6 + Math.floor(Math.random()*4));
+      });
+      Object.entries(varMap).forEach(([orig, rep]) => {
+        code = code.replace(new RegExp('\\b' + orig + '\\b', 'g'), rep);
+      });
+    }
+
+    if (activeOpts.has('stringEnc')) {
+      code = code.replace(/'([^']{3,30})'/g, (_, s) => encodeStr(s));
+      code = code.replace(/"([^"]{3,30})"/g, (_, s) => encodeStr(s));
+    }
+
+    if (activeOpts.has('numericEnc')) {
+      code = code.replace(/\b(\d{2,})\b/g, n => {
+        const v = parseInt(n);
+        const a = Math.floor(Math.random()*v);
+        return `(${a}+${v-a})`;
+      });
+    }
+
+    if (activeOpts.has('junkCode')) {
+      const junk = [
+        `local ${varName(5)}=math.floor(math.random()*0)`,
+        `if false then local ${varName(5)}=nil end`,
+        `local ${varName(5)}=string.rep("",0)`,
+        `do local ${varName(5)}=type(nil) end`,
+      ];
+      const lines = code.split('\n');
+      const out = [];
+      lines.forEach((ln, i) => {
+        out.push(ln);
+        if (i > 0 && i % 4 === 0) out.push(junk[Math.floor(Math.random()*junk.length)]);
+      });
+      code = out.join('\n');
+    }
+
+    if (activeOpts.has('ctrlFlow')) {
+      const sv = varName(6);
+      code = `local ${sv}=1\nrepeat\nif ${sv}==1 then\n${code}\n${sv}=0\nend\nuntil ${sv}==0`;
+    }
+
+    if (activeOpts.has('proxy')) {
+      const globals = ['game','workspace','math','string','table','print'];
+      globals.forEach(g => {
+        const p = varName(5);
+        code = `local ${p}=${g}\n` + code.replace(new RegExp(`\\b${g}\\b`, 'g'), p);
+      });
+    }
+
+    if (activeOpts.has('antiTamper')) {
+      const cv = varName(6);
+      code = `local ${cv}=game:GetService("RunService")\nif not ${cv} then return end\n` + code;
+    }
+
+    if (activeOpts.has('minify')) {
+      code = code.replace(/\n\s*\n/g, '\n').replace(/  +/g, ' ').trim();
+    }
+
+    const header = `--[[ U ARE AN IDIOT STUPID HOE`;
+
+    const finalCode = header + code;
+    const outEl = document.getElementById('output-code');
+    outEl.textContent = finalCode;
+    outEl.classList.remove('empty');
+
+    document.getElementById('stat-ratio').textContent = ((finalCode.length / input.length) * 100).toFixed(0) + '%';
+    document.getElementById('stat-lines').textContent = finalCode.split('\n').length;
+
+    btn.disabled = false;
+    btn.textContent = '⚡ OBFUSCATE';
+  }, 900);
+}
+
+function copyOutput() {
+  const txt = document.getElementById('output-code').textContent;
+  if (!txt.startsWith('--')) return;
+  navigator.clipboard.writeText(txt).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = 'Copy Output', 1500);
+  });
+}
+
+function clearAll() {
+  document.getElementById('input-code').value = '';
+  const out = document.getElementById('output-code');
+  out.textContent = '-- Output will appear here...';
+  out.classList.add('empty');
+  document.getElementById('prog').style.width = '0%';
+  document.getElementById('stat-ratio').textContent = '—';
+  document.getElementById('stat-lines').textContent = '—';
+}
+
+renderOpts();
+</script>
+</body>
+</html>
