@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Deadly Obfuscator — Roblox LuaU</title>
+<title>Deadly Obfuscator - By Deadly Scripts</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -328,7 +328,7 @@ Players.PlayerAdded:Connect(onPlayerAdded)"></textarea>
   </div>
 </div>
 
-<div class="watermark">DEADLY OBFUSCATOR • PROMETHEUS ENGINE • ROBLOX LUAU</div>
+<div class="watermark">DEADLY OBFUSCATOR - By Deadly Scripts</div>
 
 <script>
 const OPTIONS = [
@@ -476,7 +476,7 @@ function obfuscate() {
       code = code.replace(/\n\s*\n/g, '\n').replace(/  +/g, ' ').trim();
     }
 
-    const header = `--[[ U ARE AN IDIOT STUPID HOE`;
+    const header = `--[[ U ARE AN IDIOT STUPID HOE\n`;
 
     const finalCode = header + code;
     const outEl = document.getElementById('output-code');
